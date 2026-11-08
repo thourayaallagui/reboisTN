@@ -1,0 +1,14 @@
+# Configuration commune à TOUS les microservices (servie par le Config Server)
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+# Les fichiers propres à un service s'ajoutent ici, nommés comme son spring.application.name :
+# utilisateurs.yml, evenements.yml, inscriptions.yml, arbres.yml, suivi.yml, notifications.yml, statistiques.yml
