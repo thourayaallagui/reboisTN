@@ -1,0 +1,125 @@
+@startuml classes-analyse
+title ReboisTN - Diagramme de classes d'analyse (tous les microservices)
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam class {
+  BackgroundColor White
+  BorderColor #444444
+}
+skinparam package {
+  BorderColor #A00000
+  FontColor #A00000
+}
+hide empty members
+
+package "MS Utilisateurs" {
+  class Utilisateur {
+    nom
+    prenom
+    email
+    telephone
+    role
+  }
+  class Organisation {
+    nom
+    type
+    gouvernorat
+  }
+}
+
+package "MS Evenements" {
+  class Evenement {
+    titre
+    description
+    dateDebut
+    dateFin
+    capaciteMax
+    statut
+  }
+  class Lieu {
+    nom
+    gouvernorat
+    latitude
+    longitude
+  }
+}
+
+package "MS Inscriptions" {
+  class Inscription {
+    dateInscription
+    statut
+    presence
+  }
+}
+
+package "MS Arbres" {
+  class Arbre {
+    datePlantation
+    latitude
+    longitude
+    statut
+  }
+  class Espece {
+    nomCommun
+    nomScientifique
+  }
+}
+
+package "MS Suivi" {
+  class ControleSurvie {
+    dateControle
+    etatSante
+    hauteur
+    commentaire
+  }
+  class Photo {
+    url
+    dateAjout
+  }
+}
+
+package "MS Notifications" {
+  class Notification {
+    type
+    message
+    canal
+    dateEnvoi
+    statut
+  }
+}
+
+package "MS Statistiques (commun)" {
+  class StatistiqueZone {
+    gouvernorat
+    nbArbresPlantes
+    nbArbresVivants
+    tauxSurvie
+  }
+  class StatistiqueEvenement {
+    nbParticipants
+    nbArbresPlantes
+  }
+}
+
+Organisation "0..1" <-- "0..*" Utilisateur : appartient à
+Evenement "1" *-- "1" Lieu : se déroule à
+Evenement "0..*" --> "1" Utilisateur : organisé par
+Inscription "0..*" --> "1" Utilisateur : faite par
+Inscription "0..*" --> "1" Evenement : concerne
+Arbre "0..*" --> "1" Espece : est de l'espèce
+Arbre "0..*" --> "1" Evenement : planté lors de
+Arbre "0..*" --> "1" Utilisateur : planté par
+ControleSurvie "0..*" --> "1" Arbre : contrôle
+ControleSurvie "1" o-- "0..*" Photo : illustré par
+Notification "0..*" --> "1" Utilisateur : destinée à
+StatistiqueZone ..> Arbre : agrège
+StatistiqueEvenement ..> Evenement : résume
+StatistiqueEvenement ..> Inscription : compte
+
+note bottom of Inscription
+  Les liens entre microservices sont
+  des références logiques (identifiants),
+  pas des clés étrangères entre bases.
+end note
+@enduml

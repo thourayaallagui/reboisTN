@@ -1,0 +1,195 @@
+@startuml classes-domaine
+title ReboisTN - Diagramme de classes de domaine (tous les microservices)
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam class {
+  BackgroundColor White
+  BorderColor #444444
+}
+skinparam package {
+  BorderColor #A00000
+  FontColor #A00000
+}
+hide empty methods
+
+package "ms-utilisateurs (H2)" {
+  enum Role <<enumeration>> {
+    ADMIN
+    ORGANISATEUR
+    BENEVOLE
+  }
+  enum TypeOrganisation <<enumeration>> {
+    ONG
+    ECOLE
+    MUNICIPALITE
+  }
+  class Utilisateur <<Entity>> {
+    - id : Long
+    - keycloakId : String
+    - nom : String
+    - prenom : String
+    - email : String
+    - telephone : String
+    - role : Role
+    - organisationId : Long
+  }
+  class Organisation <<Entity>> {
+    - id : Long
+    - nom : String
+    - type : TypeOrganisation
+    - gouvernorat : String
+  }
+}
+
+package "ms-evenements (H2)" {
+  enum StatutEvenement <<enumeration>> {
+    PLANIFIE
+    EN_COURS
+    TERMINE
+    ANNULE
+  }
+  class Evenement <<Entity>> {
+    - id : Long
+    - titre : String
+    - description : String
+    - dateDebut : LocalDateTime
+    - dateFin : LocalDateTime
+    - capaciteMax : int
+    - statut : StatutEvenement
+    - organisateurId : Long
+  }
+  class Lieu <<Embeddable>> {
+    - nom : String
+    - gouvernorat : String
+    - latitude : double
+    - longitude : double
+  }
+}
+
+package "ms-inscriptions (H2)" {
+  enum StatutInscription <<enumeration>> {
+    EN_ATTENTE
+    CONFIRMEE
+    ANNULEE
+  }
+  class Inscription <<Entity>> {
+    - id : Long
+    - evenementId : Long
+    - utilisateurId : Long
+    - dateInscription : LocalDateTime
+    - statut : StatutInscription
+    - presence : boolean
+  }
+}
+
+package "ms-arbres (MySQL)" {
+  enum StatutArbre <<enumeration>> {
+    PLANTE
+    VIVANT
+    MALADE
+    MORT
+  }
+  class Espece <<Entity>> {
+    - id : Long
+    - nomCommun : String
+    - nomScientifique : String
+  }
+  class Arbre <<Entity>> {
+    - id : Long
+    - evenementId : Long
+    - planteParId : Long
+    - datePlantation : LocalDate
+    - latitude : double
+    - longitude : double
+    - gouvernorat : String
+    - statut : StatutArbre
+  }
+}
+
+package "ms-suivi (MySQL)" {
+  enum EtatSante <<enumeration>> {
+    BON
+    MOYEN
+    MAUVAIS
+    MORT
+  }
+  class ControleSurvie <<Entity>> {
+    - id : Long
+    - arbreId : Long
+    - controleurId : Long
+    - dateControle : LocalDate
+    - etatSante : EtatSante
+    - hauteurCm : int
+    - commentaire : String
+  }
+  class Photo <<Entity>> {
+    - id : Long
+    - url : String
+    - dateAjout : LocalDateTime
+  }
+}
+
+package "ms-notifications (H2)" {
+  enum TypeNotification <<enumeration>> {
+    EVENEMENT_CREE
+    INSCRIPTION_CONFIRMEE
+    RAPPEL
+    CONTROLE_ENREGISTRE
+  }
+  enum CanalNotification <<enumeration>> {
+    EMAIL
+    IN_APP
+  }
+  class Notification <<Entity>> {
+    - id : Long
+    - destinataireId : Long
+    - type : TypeNotification
+    - message : String
+    - canal : CanalNotification
+    - dateEnvoi : LocalDateTime
+    - lue : boolean
+  }
+}
+
+package "ms-statistiques (MongoDB) - commun" {
+  class StatistiqueZone <<Document>> {
+    - id : String
+    - gouvernorat : String
+    - espece : String
+    - nbArbresPlantes : long
+    - nbArbresVivants : long
+    - tauxSurvie : double
+  }
+  class StatistiqueEvenement <<Document>> {
+    - id : String
+    - evenementId : Long
+    - nbParticipants : int
+    - nbArbresPlantes : long
+  }
+}
+
+' --- relations internes à un microservice (clé étrangère JPA)
+Organisation "0..1" <-- "0..*" Utilisateur
+Utilisateur --> Role
+Organisation --> TypeOrganisation
+Evenement *-- Lieu
+Evenement --> StatutEvenement
+Inscription --> StatutInscription
+Arbre "0..*" --> "1" Espece
+Arbre --> StatutArbre
+ControleSurvie "1" *-- "0..*" Photo
+ControleSurvie --> EtatSante
+Notification --> TypeNotification
+Notification --> CanalNotification
+
+' --- références entre microservices (par identifiant uniquement)
+Evenement ..> Utilisateur : organisateurId
+Inscription ..> Evenement : evenementId (OpenFeign)
+Inscription ..> Utilisateur : utilisateurId (OpenFeign)
+Arbre ..> Evenement : evenementId (OpenFeign)
+Arbre ..> Utilisateur : planteParId
+ControleSurvie ..> Arbre : arbreId (OpenFeign)
+Notification ..> Utilisateur : destinataireId
+StatistiqueEvenement ..> Evenement : evenementId
+@enduml

@@ -1,0 +1,84 @@
+@startuml architecture-technique
+title ReboisTN - Architecture technique globale
+skinparam shadowing false
+skinparam defaultTextAlignment center
+skinparam componentStyle rectangle
+skinparam linetype polyline
+skinparam nodesep 40
+skinparam ranksep 55
+
+actor "Bénévole / ONG / École / Municipalité" as User
+
+rectangle "Client (réseau public)" {
+  component "Web App\n(Angular / React)" as Web
+  component "Mobile App\n(Flutter / React Native)" as Mobile
+}
+
+component "Keycloak :8180\nAuthentification, rôles, JWT" as KC #FADBD8
+
+rectangle "Docker Host - Docker Compose (réseau privé)" #F8F8F8 {
+
+  component "API Gateway :8080\nSpring Cloud Gateway" as GW #D6EAF8
+  component "Eureka Server :8761\nRegistre des services" as EU #FDEBD0
+  queue "RabbitMQ :5672\nexchange reboistn.events" as MQ #FFE5CC
+
+  rectangle "Microservices Spring Boot (1 conteneur + 1 base par service)" as MS {
+    component "ms-utilisateurs :8081" as MSU
+    component "ms-evenements :8082" as MSE
+    component "ms-inscriptions :8083" as MSI
+    component "ms-arbres :8084" as MSA
+    component "ms-suivi :8085" as MSS
+    component "ms-notifications :8086" as MSN
+    component "ms-statistiques :8087\n(commun)" as MST #FADBD8
+
+    database "H2" as DB1
+    database "H2" as DB2
+    database "H2" as DB3
+    database "MySQL" as DB4
+    database "MySQL" as DB5
+    database "H2" as DB6
+    database "MongoDB" as DB7
+  }
+}
+
+User --> Web
+User --> Mobile
+Web --> KC : login -> JWT
+Mobile --> KC : login -> JWT
+Web --> GW : Bearer JWT
+Mobile --> GW : Bearer JWT
+GW ..> KC : valide le JWT
+GW --> MS : routage /api/** (lb://NOM)
+GW ..> EU : résolution des services
+MS ..> EU : enregistrement + heartbeat
+
+MSU -down- DB1
+MSE -down- DB2
+MSI -down- DB3
+MSA -down- DB4
+MSS -down- DB5
+MSN -down- DB6
+MST -down- DB7
+
+' Synchrone (OpenFeign)
+MSI -[#2E86C1,dashed]-> MSE : Feign
+MSI -[#2E86C1,dashed]-> MSU : Feign
+MSA -[#2E86C1,dashed]-> MSE : Feign
+MSS -[#2E86C1,dashed]-> MSA : Feign
+
+' Asynchrone (RabbitMQ)
+MSE -[#1E8449,dotted]-> MQ : EvenementCree
+MSI -[#1E8449,dotted]-> MQ : InscriptionConfirmee
+MSA -[#1E8449,dotted]-> MQ : ArbrePlante
+MSS -[#1E8449,dotted]-> MQ : ControleEnregistre
+MQ -[#1E8449,dotted]-> MSN : consomme
+MQ -[#1E8449,dotted]-> MST : consomme
+
+legend right
+  | Trait | Signification |
+  | <color:#2E86C1>- - -></color> | Appel synchrone (OpenFeign) |
+  | <color:#1E8449>.....></color> | Événement asynchrone (RabbitMQ) |
+  | ----> | Requête HTTP |
+  | ....> | Découverte / sécurité |
+endlegend
+@enduml
