@@ -3,6 +3,7 @@ package ms_suivi.entity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.persistence.FetchType;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -56,11 +57,13 @@ public class Suivi {
     @JsonManagedReference
     @Fetch(FetchMode.SUBSELECT)
     @Builder.Default
+    @Valid
     private List<Intervention> interventions = new ArrayList<>();
 
     @OneToMany(mappedBy = "suivi", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     @Fetch(FetchMode.SUBSELECT)
     @Builder.Default
+    @Valid
     private List<PhotoSuivi> photos = new ArrayList<>();
 }

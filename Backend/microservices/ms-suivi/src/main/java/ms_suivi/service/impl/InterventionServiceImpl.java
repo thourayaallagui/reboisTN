@@ -2,6 +2,7 @@ package ms_suivi.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import ms_suivi.entity.Intervention;
+import ms_suivi.exception.ResourceNotFoundException;
 import ms_suivi.repository.InterventionRepository;
 import ms_suivi.service.InterventionService;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class InterventionServiceImpl implements InterventionService {
     @Override
     public Intervention updateIntervention(Long id, Intervention intervention) {
         Intervention existingIntervention = interventionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Intervention not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Intervention", id));
 
         existingIntervention.setSuivi(intervention.getSuivi());
         existingIntervention.setTypeIntervention(intervention.getTypeIntervention());
@@ -37,7 +38,7 @@ public class InterventionServiceImpl implements InterventionService {
     @Override
     public void deleteIntervention(Long id) {
         if (!interventionRepository.existsById(id)) {
-            throw new RuntimeException("Intervention not found with id: " + id);
+            throw new ResourceNotFoundException("Intervention", id);
         }
         interventionRepository.deleteById(id);
     }
@@ -45,7 +46,7 @@ public class InterventionServiceImpl implements InterventionService {
     @Override
     public Intervention getInterventionById(Long id) {
         return interventionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Intervention not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Intervention", id));
     }
 
     @Override

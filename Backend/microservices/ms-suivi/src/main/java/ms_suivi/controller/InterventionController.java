@@ -1,5 +1,6 @@
 package ms_suivi.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import ms_suivi.entity.Intervention;
 import ms_suivi.service.InterventionService;
@@ -11,20 +12,22 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/interventions")
+@RequestMapping({"/api/interventions", "/api/suivis/interventions"})
 @RequiredArgsConstructor
 public class InterventionController {
 
     private final InterventionService interventionService;
 
     @PostMapping
-    public ResponseEntity<Intervention> createIntervention(@RequestBody Intervention intervention) {
+    public ResponseEntity<Intervention> createIntervention(@Valid @RequestBody Intervention intervention) {
         Intervention createdIntervention = interventionService.createIntervention(intervention);
         return new ResponseEntity<>(createdIntervention, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Intervention> updateIntervention(@PathVariable Long id, @RequestBody Intervention intervention) {
+    public ResponseEntity<Intervention> updateIntervention(
+            @PathVariable Long id,
+            @Valid @RequestBody Intervention intervention) {
         Intervention updatedIntervention = interventionService.updateIntervention(id, intervention);
         return ResponseEntity.ok(updatedIntervention);
     }
@@ -37,12 +40,7 @@ public class InterventionController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Intervention> getInterventionById(@PathVariable Long id) {
-        try {
-            Intervention intervention = interventionService.getInterventionById(id);
-            return ResponseEntity.ok(intervention);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(interventionService.getInterventionById(id));
     }
 
     @GetMapping

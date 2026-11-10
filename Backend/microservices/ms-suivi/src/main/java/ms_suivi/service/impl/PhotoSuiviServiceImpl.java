@@ -2,6 +2,7 @@ package ms_suivi.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import ms_suivi.entity.PhotoSuivi;
+import ms_suivi.exception.ResourceNotFoundException;
 import ms_suivi.repository.PhotoSuiviRepository;
 import ms_suivi.service.PhotoSuiviService;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class PhotoSuiviServiceImpl implements PhotoSuiviService {
     @Override
     public PhotoSuivi updatePhotoSuivi(Long id, PhotoSuivi photoSuivi) {
         PhotoSuivi existingPhoto = photoSuiviRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("PhotoSuivi not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("PhotoSuivi", id));
 
         existingPhoto.setSuivi(photoSuivi.getSuivi());
         existingPhoto.setUrlPhoto(photoSuivi.getUrlPhoto());
@@ -36,7 +37,7 @@ public class PhotoSuiviServiceImpl implements PhotoSuiviService {
     @Override
     public void deletePhotoSuivi(Long id) {
         if (!photoSuiviRepository.existsById(id)) {
-            throw new RuntimeException("PhotoSuivi not found with id: " + id);
+            throw new ResourceNotFoundException("PhotoSuivi", id);
         }
         photoSuiviRepository.deleteById(id);
     }
@@ -44,7 +45,7 @@ public class PhotoSuiviServiceImpl implements PhotoSuiviService {
     @Override
     public PhotoSuivi getPhotoSuiviById(Long id) {
         return photoSuiviRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("PhotoSuivi not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("PhotoSuivi", id));
     }
 
     @Override

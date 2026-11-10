@@ -1,5 +1,6 @@
 package ms_suivi.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import ms_suivi.entity.PhotoSuivi;
 import ms_suivi.service.PhotoSuiviService;
@@ -11,20 +12,22 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/photos")
+@RequestMapping({"/api/photos", "/api/suivis/photos"})
 @RequiredArgsConstructor
 public class PhotoSuiviController {
 
     private final PhotoSuiviService photoSuiviService;
 
     @PostMapping
-    public ResponseEntity<PhotoSuivi> createPhotoSuivi(@RequestBody PhotoSuivi photoSuivi) {
+    public ResponseEntity<PhotoSuivi> createPhotoSuivi(@Valid @RequestBody PhotoSuivi photoSuivi) {
         PhotoSuivi createdPhoto = photoSuiviService.createPhotoSuivi(photoSuivi);
         return new ResponseEntity<>(createdPhoto, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PhotoSuivi> updatePhotoSuivi(@PathVariable Long id, @RequestBody PhotoSuivi photoSuivi) {
+    public ResponseEntity<PhotoSuivi> updatePhotoSuivi(
+            @PathVariable Long id,
+            @Valid @RequestBody PhotoSuivi photoSuivi) {
         PhotoSuivi updatedPhoto = photoSuiviService.updatePhotoSuivi(id, photoSuivi);
         return ResponseEntity.ok(updatedPhoto);
     }
@@ -37,12 +40,7 @@ public class PhotoSuiviController {
 
     @GetMapping("/{id}")
     public ResponseEntity<PhotoSuivi> getPhotoSuiviById(@PathVariable Long id) {
-        try {
-            PhotoSuivi photo = photoSuiviService.getPhotoSuiviById(id);
-            return ResponseEntity.ok(photo);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(photoSuiviService.getPhotoSuiviById(id));
     }
 
     @GetMapping
