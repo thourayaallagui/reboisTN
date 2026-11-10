@@ -1,0 +1,73 @@
+@startuml ms-notifications-sequence
+title MS Notifications — Séquence : Événement créé → Notification IN_APP → Consultation
+
+skinparam sequenceArrowThickness 2
+skinparam sequenceParticipantPadding 20
+skinparam sequenceBoxBorderColor #2E7D32
+
+actor "Organisateur" as org
+participant "ms-evenements" as msev
+queue "RabbitMQ\n(exchange: reboistn.events)" as rmq
+participant "ms-notifications" as msnotif
+database "notifications_db\n(H2)" as db
+participant "API Gateway\n(port 8080)" as gw
+actor "Bénévole" as benevole
+
+== Publication de l'événement (asynchrone) ==
+
+org -> msev : POST /api/evenements\n{titre, date, lieu...}
+activate msev
+msev -> msev : Persiste l'événement en base
+msev -> rmq : publish(exchange="reboistn.events",\nroutingKey="evenement.cree",\nbody=EvenementCreeEvent)
+deactivate msev
+
+note over rmq
+  Le message est stocké dans la queue
+  "notifications.evenement.cree" liée à
+  l'exchange avec le binding "evenement.cree".
+end note
+
+== Consommation par ms-notifications ==
+
+rmq -> msnotif : consume(EvenementCreeEvent)
+activate msnotif
+msnotif -> msnotif : Construit une Notification\n(type=EVENEMENT_CREE, canal=IN_APP)
+msnotif -> db : save(Notification)
+db --> msnotif : Notification persistée
+deactivate msnotif
+
+note over rmq, msnotif
+  **Résilience** : si ms-notifications est arrêté,
+  RabbitMQ conserve le message dans la queue
+  (queue durable). Le message sera traité
+  automatiquement au redémarrage du service.
+end note
+
+== Consultation par le bénévole ==
+
+benevole -> gw : GET /api/notifications\n(Header: X-User-Id = "user-1")
+activate gw
+gw -> msnotif : GET /api/notifications\n(routé via Eureka)
+activate msnotif
+msnotif -> db : findByDestinataireIdOrderByDateCreationDesc("user-1")
+db --> msnotif : List<Notification>
+msnotif --> gw : 200 OK [NotificationResponse, ...]
+deactivate msnotif
+gw --> benevole : 200 OK [NotificationResponse, ...]
+deactivate gw
+
+== Marquer comme lue ==
+
+benevole -> gw : PATCH /api/notifications/1/lue
+activate gw
+gw -> msnotif : PATCH /api/notifications/1/lue
+activate msnotif
+msnotif -> db : findById(1) → set lue=true → save()
+db --> msnotif : Notification mise à jour
+msnotif --> gw : 200 OK (NotificationResponse)
+deactivate msnotif
+gw --> benevole : 200 OK
+deactivate gw
+
+@enduml
+

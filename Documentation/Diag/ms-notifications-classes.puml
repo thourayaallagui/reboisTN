@@ -1,0 +1,157 @@
+@startuml ms-notifications-classes
+title MS Notifications — Diagramme de classes
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam class {
+  BackgroundColor White
+  BorderColor #444444
+}
+skinparam package {
+  BorderColor #2E7D32
+  FontColor #2E7D32
+}
+
+package "tn.esprit.reboistn.notifications" {
+
+  package "enums" {
+    enum TypeNotification {
+      EVENEMENT_CREE
+      INSCRIPTION_CONFIRMEE
+      ARBRE_PLANTE
+      ARBRE_MALADE
+    }
+    enum CanalNotification {
+      EMAIL
+      IN_APP
+    }
+  }
+
+  package "entity" {
+    class Notification {
+      - id : Long
+      - destinataireId : String
+      - type : TypeNotification
+      - canal : CanalNotification
+      - titre : String
+      - message : String
+      - lue : boolean
+      - dateCreation : LocalDateTime
+      - dateEnvoi : LocalDateTime
+      - referenceId : Long
+      + onCreate() : void
+    }
+  }
+
+  package "dto" {
+    class NotificationResponse <<record>> {
+      + id : Long
+      + destinataireId : String
+      + type : TypeNotification
+      + canal : CanalNotification
+      + titre : String
+      + message : String
+      + lue : boolean
+      + dateCreation : LocalDateTime
+      + dateEnvoi : LocalDateTime
+      + referenceId : Long
+    }
+    class NotificationCountResponse <<record>> {
+      + destinataireId : String
+      + count : long
+    }
+  }
+
+  package "event" {
+    class EvenementCreeEvent <<record>> {
+      + evenementId : Long
+      + titre : String
+      + description : String
+      + dateDebut : LocalDateTime
+      + organisateurId : String
+      + lieu : String
+    }
+    class InscriptionConfirmeeEvent <<record>> {
+      + inscriptionId : Long
+      + evenementId : Long
+      + participantId : String
+      + titreEvenement : String
+      + dateInscription : LocalDateTime
+    }
+    class ArbrePlanteEvent <<record>> {
+      + arbreId : Long
+      + evenementId : Long
+      + espece : String
+      + planteurId : String
+      + datePlantation : LocalDateTime
+      + latitude : double
+      + longitude : double
+    }
+    class ControleEnregistreEvent <<record>> {
+      + controleId : Long
+      + arbreId : Long
+      + etatSante : String
+      + hauteur : double
+      + commentaire : String
+      + dateControle : LocalDateTime
+    }
+  }
+
+  package "repository" {
+    interface NotificationRepository <<JpaRepository>> {
+      + findByDestinataireIdOrderByDateCreationDesc(destinataireId : String) : List<Notification>
+      + countByDestinataireIdAndLueFalse(destinataireId : String) : long
+    }
+  }
+
+  package "service" {
+    class NotificationService {
+      - notificationRepository : NotificationRepository
+      + getNotificationsForUser(userId : String) : List<NotificationResponse>
+      + countUnread(userId : String) : NotificationCountResponse
+      + markAsRead(id : Long) : NotificationResponse
+      + delete(id : Long) : void
+      - toResponse(n : Notification) : NotificationResponse
+    }
+  }
+
+  package "controller" {
+    class NotificationController {
+      - notificationService : NotificationService
+      + getNotifications(userId : String) : ResponseEntity
+      + countUnread(userId : String) : ResponseEntity
+      + markAsRead(id : Long) : ResponseEntity
+      + delete(id : Long) : ResponseEntity
+    }
+  }
+
+  package "exception" {
+    class NotificationNotFoundException {
+      + NotificationNotFoundException(id : Long)
+    }
+    class GlobalExceptionHandler {
+      + handleNotFound(ex) : ResponseEntity
+      + handleBadRequest(ex) : ResponseEntity
+    }
+  }
+}
+
+' Relations
+Notification --> TypeNotification
+Notification --> CanalNotification
+NotificationRepository --> Notification
+NotificationService --> NotificationRepository
+NotificationService ..> NotificationResponse : "crée"
+NotificationService ..> NotificationCountResponse : "crée"
+NotificationService ..> NotificationNotFoundException : "lève"
+NotificationController --> NotificationService
+GlobalExceptionHandler ..> NotificationNotFoundException : "gère"
+
+note right of EvenementCreeEvent
+  Ces records représentent les messages
+  RabbitMQ qui seront consommés en S7
+  via @RabbitListener.
+end note
+
+@enduml
+
