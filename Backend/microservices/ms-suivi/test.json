@@ -1,0 +1,14 @@
+{
+  "arbreId": 5,
+  "dateSuivi": "2024-07-01",
+  "hauteur": 2.0,
+  "diametreTronc": 10.0,
+  "etatSante": "BON",
+  "observation": "Test PUT",
+  "interventions": [
+    { "typeIntervention": "ARROSAGE", "dateIntervention": "2024-07-01", "description": "Test" }
+  ],
+  "photos": [
+    { "urlPhoto": "http://example.com/photos/test.jpg", "dateAjout": "2024-07-01" }
+  ]
+}
