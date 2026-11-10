@@ -1,5 +1,5 @@
 package tn.reboistn.utilisateurs.controller;
-
+import org.springframework.web.server.ResponseStatusException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +21,12 @@ public class OrganisationController {
     @GetMapping
     public List<Organisation> lister() {
         return repository.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public Organisation detail(@PathVariable Long id) {
+        return repository.findById(id).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Organisation introuvable"));
     }
 
     @PostMapping
