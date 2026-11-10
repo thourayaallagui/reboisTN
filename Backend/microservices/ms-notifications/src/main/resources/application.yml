@@ -1,0 +1,58 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: NOTIFICATIONS
+
+  # --- Base de données H2 en mémoire ---
+  datasource:
+    url: jdbc:h2:mem:notifications_db
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # --- RabbitMQ : auto-startup désactivé pour que l'app démarre sans broker ---
+  rabbitmq:
+    listener:
+      simple:
+        auto-startup: false
+    # host: localhost    # TODO S7 : configurer l'hôte RabbitMQ
+    # port: 5672
+
+  # --- Profils ---
+  profiles:
+    active: dev
+
+# --- Eureka : DÉSACTIVÉ par défaut ---
+# TODO S5 : activer Eureka en mettant enabled: true et en décommentant l'URL
+eureka:
+  client:
+    enabled: false
+    # service-url:
+    #   defaultZone: http://localhost:8761/eureka
+
+# --- Springdoc / Swagger ---
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+# --- Actuator ---
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
