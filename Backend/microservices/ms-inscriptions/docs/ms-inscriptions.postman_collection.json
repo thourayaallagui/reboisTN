@@ -1,0 +1,87 @@
+{
+  "info": {
+    "_postman_id": "71e4e904-7f58-4f6c-a5f4-c2cf6b2f6d90",
+    "name": "ms-inscriptions",
+    "description": "Collection des dix opérations REST du microservice ms-inscriptions.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Créer une inscription",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"identifiantBenevole\": 42,\n  \"identifiantEvenement\": 15\n}", "options": { "raw": { "language": "json" } } },
+        "url": { "raw": "{{baseUrl}}/api/inscriptions", "host": ["{{baseUrl}}"], "path": ["api", "inscriptions"] }
+      }
+    },
+    {
+      "name": "Lister les inscriptions",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/api/inscriptions", "host": ["{{baseUrl}}"], "path": ["api", "inscriptions"] }
+      }
+    },
+    {
+      "name": "Consulter par identifiant",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/api/inscriptions/1", "host": ["{{baseUrl}}"], "path": ["api", "inscriptions", "1"] }
+      }
+    },
+    {
+      "name": "Lister par bénévole",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/api/inscriptions/benevole/42", "host": ["{{baseUrl}}"], "path": ["api", "inscriptions", "benevole", "42"] }
+      }
+    },
+    {
+      "name": "Lister par événement",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "{{baseUrl}}/api/inscriptions/evenement/15", "host": ["{{baseUrl}}"], "path": ["api", "inscriptions", "evenement", "15"] }
+      }
+    },
+    {
+      "name": "Modifier une inscription",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"identifiantBenevole\": 42,\n  \"identifiantEvenement\": 16\n}", "options": { "raw": { "language": "json" } } },
+        "url": { "raw": "{{baseUrl}}/api/inscriptions/1", "host": ["{{baseUrl}}"], "path": ["api", "inscriptions", "1"] }
+      }
+    },
+    {
+      "name": "Confirmer une inscription",
+      "request": {
+        "method": "PATCH",
+        "url": { "raw": "{{baseUrl}}/api/inscriptions/1/confirmer", "host": ["{{baseUrl}}"], "path": ["api", "inscriptions", "1", "confirmer"] }
+      }
+    },
+    {
+      "name": "Annuler une inscription",
+      "request": {
+        "method": "PATCH",
+        "url": { "raw": "{{baseUrl}}/api/inscriptions/1/annuler", "host": ["{{baseUrl}}"], "path": ["api", "inscriptions", "1", "annuler"] }
+      }
+    },
+    {
+      "name": "Enregistrer la présence",
+      "request": {
+        "method": "PATCH",
+        "url": { "raw": "{{baseUrl}}/api/inscriptions/1/presence", "host": ["{{baseUrl}}"], "path": ["api", "inscriptions", "1", "presence"] }
+      }
+    },
+    {
+      "name": "Supprimer une inscription",
+      "request": {
+        "method": "DELETE",
+        "url": { "raw": "{{baseUrl}}/api/inscriptions/1", "host": ["{{baseUrl}}"], "path": ["api", "inscriptions", "1"] }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080", "type": "string" }
+  ]
+}
