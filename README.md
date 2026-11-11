@@ -24,6 +24,25 @@ L'authentification (login, mot de passe, jetons JWT) est assurée par **Keycloak
 | Préfixe des routes | `/api/utilisateurs` |
 | Responsable | Kmar Srarfi |
 
+### Justification du choix de H2
+
+Nous avons choisi H2 comme base de données pour
+faciliter le développement et les tests du microservice.
+
+H2 est une base de données légère qui fonctionne
+en mémoire. Elle est facile à configurer et ne
+nécessite pas l'installation d'un serveur externe.
+
+Ce choix permet de tester rapidement les fonctionnalités
+du microservice.
+
+Cependant, les données stockées en mémoire peuvent
+être perdues lorsque l'application s'arrête.
+
+Pour un environnement de production, PostgreSQL
+ou MySQL serait plus adapté afin de garantir
+la persistance des données.
+
 ## 2. Place dans l'architecture
 
 ```
@@ -71,18 +90,18 @@ API Gateway (8080) ──► ms-utilisateurs (8082) ──► H2 (utilisateurs_d
 
 Toutes les routes sont accessibles via la Gateway : `http://localhost:8080/api/utilisateurs/...`
 
-| Méthode | Endpoint | Fonction | Codes |
-|---|---|---|---|
-| GET | `/api/utilisateurs` | Lister les utilisateurs (ADMIN) | 200 |
-| GET | `/api/utilisateurs/{id}` | Consulter un utilisateur | 200, 404 |
-| PUT | `/api/utilisateurs/{id}` | Modifier un utilisateur | 200, 400, 404 |
-| DELETE | `/api/utilisateurs/{id}` | Supprimer un utilisateur | 204, 404 |
-| GET | `/api/utilisateurs/me` | Profil de l'utilisateur connecté (identifié par son jeton) | 200 |
-| POST | `/api/utilisateurs` | Créer un profil après inscription Keycloak | 201, 400, 409 |
-| GET | `/api/utilisateurs/organisations` | Lister les organisations | 200 |
-| POST | `/api/utilisateurs/organisations` | Créer une organisation | 201, 400 |
-| GET | `/api/utilisateurs/organisations/{id}` | Détail d'une organisation | 200, 404 |
-| GET | `/api/utilisateurs/hello` | Vérifier que le service répond | 200 |
+| Méthode | Endpoint | Paramètres | Réponse | Codes HTTP |
+|---|---|---|---|---|
+| GET | /api/utilisateurs | Aucun | Liste des utilisateurs | 200 |
+| GET | /api/utilisateurs/{id} | id (Long) | Utilisateur | 200, 404 |
+| PUT | /api/utilisateurs/{id} | id + données utilisateur | Utilisateur modifié | 200, 400, 404 |
+| DELETE | /api/utilisateurs/{id} | id (Long) | Aucune réponse | 204, 404 |
+| GET | /api/utilisateurs/me | Jeton JWT | Profil connecté | 200 |
+| POST | /api/utilisateurs | Données utilisateur | Profil créé | 201, 400, 409 |
+| GET | /api/utilisateurs/organisations | Aucun | Liste des organisations | 200 |
+| POST | /api/utilisateurs/organisations | Données organisation | Organisation créée | 201, 400 |
+| GET | /api/utilisateurs/organisations/{id} | id (Long) | Organisation | 200, 404 |
+| GET | /api/utilisateurs/hello | Aucun | Message de disponibilité | 200 |
 
 ### Règles métier
 
