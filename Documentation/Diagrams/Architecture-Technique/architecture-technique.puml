@@ -23,10 +23,10 @@ rectangle "Docker Host - Docker Compose (réseau privé)" #F8F8F8 {
   queue "RabbitMQ :5672\nexchange reboistn.events" as MQ #FFE5CC
 
   rectangle "Microservices Spring Boot (1 conteneur + 1 base par service)" as MS {
-    component "ms-utilisateurs :8081" as MSU
-    component "ms-evenements :8082" as MSE
-    component "ms-inscriptions :8083" as MSI
-    component "ms-arbres :8084" as MSA
+    component "ms-utilisateurs :8082" as MSU
+    component "ms-evenements :8081" as MSE
+    component "ms-inscriptions :8084" as MSI
+    component "ms-arbres :8083" as MSA
     component "ms-suivi :8085" as MSS
     component "ms-notifications :8086" as MSN
     component "ms-statistiques :8087\n(commun)" as MST #FADBD8
