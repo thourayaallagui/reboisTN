@@ -2,10 +2,10 @@
 
 Registre des arbres plantés (espèce, position GPS, gouvernorat, date, événement) et catalogue des espèces.
 
-- Port : 8084 · Base : MySQL (arbres_db, créée automatiquement) · Nom Eureka : ARBRES
-- Swagger : http://localhost:8084/swagger-ui.html
+- Port : 8083 · Base : MySQL (arbres_db, créée automatiquement) · Nom Eureka : ARBRES
+- Swagger : http://localhost:8083/swagger-ui.html
 - MySQL (XAMPP) : utilisateur root, mot de passe vide par défaut (sinon variable d environnement `DB_PASSWORD`)
-- Sans MySQL : lancer avec le profil `h2` (base en mémoire), console sur http://localhost:8084/h2-console
+- Sans MySQL : lancer avec le profil `h2` (base en mémoire), console sur http://localhost:8083/h2-console
 
 | Méthode | URI | Codes |
 |---|---|---|
